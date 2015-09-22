@@ -1,0 +1,301 @@
+
+<!doctype html>
+<html>
+  <head>
+    <title>Genee Animation</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <script src="url.js"></script>
+    <script src="jquery.js"></script>
+    <script src="two.js"></script>
+    <script src="physics.js"></script>
+  </head>
+  <body>
+    <div class="scripts">
+      <script>
+
+        // Makes every component of eye except white part
+        function getEYEpoints(points,n,j,radius,xoffset,yoffset){ 
+          for (i = 0; i < n; i++) {
+            var theta = (i / n) * Math.PI * 2;
+            var ax = radius * Math.cos(theta) + (j*15) - xoffset;
+            var ay = radius * Math.sin(theta) - 48 - yoffset;
+            points.push(makeParticles(ax,ay));
+          }
+          return(points);
+        }
+
+        // Makes white part of eye
+        function getEYEBALLpoints(points,n,j,radius,xoffset,yoffset){ 
+          for (i = -1; i < ((n/2)+1); i++) {
+            var theta = (i / n) * Math.PI * 2;
+            var ax = radius * Math.cos(theta) + (j*15) - xoffset;
+            var ay = radius * Math.sin(theta) - 48 - yoffset;
+            points.push(makeParticles(ax,ay));
+          }
+          return(points);
+        }
+
+        // General function for particle physics
+        function makeParticles(x,y){ 
+          var mass = 90; // Change this to change how fast Genee bounces
+          var origin = physics.makeParticle(mass, x, y)
+          var particle = physics.makeParticle(mass * 2.66, x, (y * 0.97));
+          var spring = physics.makeSpring(particle, origin, 1, 0, 0);
+
+          origin.makeFixed();
+          particle.shape = two.makeCircle(particle.position.x, particle.position.y, 5);
+          particle.shape.noFill().noStroke();
+          particle.position = particle.shape.translation;
+          return(particle.position);
+        }
+
+        // Function for making entire eye taken from renderers.html
+        // function makeEye(two, color) {
+
+        //   var ball = two.makeGroup();
+        //   var eye = two.makeGroup();
+
+        //   var retina = two.makeCircle(0, 0, two.height / 4);
+        //   retina.fill = color || 'rgb(155,155,155';
+        //   retina.noStroke();
+
+        //   var pupil = two.makeCircle(0, 0, two.height / 6);
+        //   pupil.fill = 'rgb(0,0,0)';
+        //   pupil.linewidth = 10;
+        //   pupil.noStroke();
+        //   var reflection = two.makeCircle(two.height / 12, - two.height / 12, two.height / 12)
+        //   reflection.fill = 'rgba(255, 255, 255, 0.9)';
+        //   reflection.noStroke();
+
+        //   var lid = two.makeEllipse(0, 0, two.height / 3, two.height / 4);
+
+        //   var points = [
+        //     new Two.Vector(0, two.height / 2),
+        //     new Two.Vector(0, 0),
+        //     new Two.Vector(two.width, 0),
+        //     new Two.Vector(two.width, two.height / 2)
+        //   ];
+        //   var midpoint = Math.round(lid.vertices.length / 2) - 1;
+        //   var topbrow = lid.vertices.slice(midpoint).reverse();
+        //   for (var i = 0; i < topbrow.length; i++) {
+        //     var v = topbrow[i];
+        //     points.push(new Two.Vector(v.x + two.width / 2, v.y + two.height / 2));
+        //   }
+        //   for (var i = 0; i < points.length; i++) {
+        //     var v = points[i];
+        //     v.x -= two.width / 2;
+        //     v.y -= two.height / 2;
+        //   }
+        //   var topMask = two.makePolygon(points);
+        //   topMask.fill = 'white';
+        //   topMask.noStroke();
+
+        //   points = [
+        //     new Two.Vector(0, two.height / 2),
+        //     new Two.Vector(0, two.height),
+        //     new Two.Vector(two.width, two.height),
+        //     new Two.Vector(two.width, two.height / 2)
+        //   ];
+        //   var botbrow = [lid.vertices[lid.vertices.length - 1]].concat(lid.vertices.slice(0, midpoint + 1));
+        //   for (var i = 0; i < botbrow.length; i++) {
+        //     var v = botbrow[i];
+        //     points.push(new Two.Vector(v.x + two.width / 2, v.y + two.height / 2));
+        //   }
+        //   for (var i = 0; i < points.length; i++) {
+        //     var v = points[i];
+        //     v.x -= two.width / 2;
+        //     v.y -= two.height / 2;
+        //   }
+        //   var botMask = two.makePolygon(points);
+        //   botMask.fill = 'white';
+        //   botMask.noStroke();
+
+        //   lid.remove();
+        //   lid = two.makeEllipse(0, 0, two.height / 3, two.height / 4);
+        //   lid.stroke = '#333';
+        //   lid.linewidth = 15;
+        //   lid.noFill();
+
+        //   ball.add(retina, pupil, reflection);
+        //   ball.destination = new Two.Vector();
+
+        //   eye.add(ball, topMask, botMask, lid);
+        //   eye.translation.set(two.width / 2, two.height / 2)
+
+        //   eye.masks = [topbrow, botbrow];
+        //   eye.ball = ball;
+
+        //   return eye;
+
+        // }
+
+        // Function for keeping track of mouse movements taken from renderers.html
+        // function mousemove(e) {
+
+          // var mouse = new Two.Vector(e.clientX, e.clientY);
+          // _.each(eyes, function(eye) {
+          //   var rect = eye.domElement.getBoundingClientRect();
+          //   var center = {
+          //     x: rect.left + rect.width / 2,
+          //     y: rect.top + rect.height / 2
+          //   };
+          //   var theta = Math.atan2(mouse.y - center.y, mouse.x - center.x);
+          //   var distance = mouse.distanceTo(center);
+          //   var pct = distance / $window.width();
+          //   var radius = 75 * pct;
+          //   eye.ball.destination.set(radius * Math.cos(theta), radius * Math.sin(theta));
+          // });
+          // releaseEyes();
+        // }
+
+
+        // Resets eyeball after inactive mouse - taken from renderers.html
+          // var releaseEyes = _.debounce(function() {
+          //   _.each(eyes, function(eye) {
+          //     eye.ball.destination.clear();
+          //   });
+          // }, 1000);
+
+          // var $window = $(window)
+          //   .bind('mousemove', mousemove)
+          //   .bind('touchmove', function(e) {
+          //     var touch = e.originalEvent.changedTouches[0];
+          //     mousemove({
+          //       clientX: touch.pageX,
+          //       clientY: touch.pageY
+          //     });
+          //     return false;
+          //   });
+
+        var type = /canvas/.test(url.type) ? url.type : 'svg';
+        var two = new Two({ type: Two.Types[type], fullscreen: true, autostart: true }).appendTo(document.body);
+        var GENEE = two.makeGroup();
+        var physics = new Physics();
+        var eyepoints = [];
+        var dnascale = 4.5, dnalinewidth = 1;
+        var xlooking = -1 * Math.random();
+        var ylooking = -1 * Math.random();
+        var colors = ['rgb(0,86,133)','rgb(235,178,51)','rgb(182,221,69)','rgb(255,255,255)','rgb(150,150,150)','rgb(0,0,0)']; //blue, orange, green, white, grey, black
+
+        var ids = []; // y coords of bars {-0.2,0.1,0.4,0.7,1.1...}
+        ids.push(-0.2);
+        for (var i=0; i<15;i++){ ids.push((i*0.3)+0.1); }
+
+        for (x in ids) { // adding basepair lines
+          var n = ids[x];
+          line = new Two.Polygon(
+            _.map(_.range(2), function(i) {
+            var variance = [4,2,0.9,1,3.5,7,2,1,0.5,3,7,2.7,0.5,1,2.5,5];
+            var v = parseInt((((n+0.5)/0.3)-1));
+            if (i==0) { var x = (i * 15) + variance[v]; }
+            else { var x = (i * 15) - variance[v]; }
+            var y = (n-5) * 10;
+            return makeParticles(x,y);
+            }) ,false,true);
+          line.noFill().stroke = colors[(x % 2) + 1];
+          line.scale = dnascale, line.linewidth = dnalinewidth, line.opacity = 1, line.cap = "round";
+          GENEE.add(line);
+        }
+
+        var ids = [1,2]; // for left/right items
+        var num = 5; // adding DNA backbone
+        for (id in ids){
+          var flag = ids[id];
+          dna = new Two.Polygon(
+            _.map(_.range(num), function(i) {
+              var x = (((i + flag) % 2) * 15);
+              var y = i * -15;
+              return makeParticles(x,y)
+            }), false, true);
+          dna.noFill().stroke = colors[0];
+          dna.scale = dnascale, dna.linewidth = dnalinewidth, dna.opacity = 1;
+          GENEE.add(dna);
+        }
+
+        var ids = [1,2];
+        for (i in ids) { // adding eyelid (# points, left/right, radius, xoffset, yoffset)
+          var eyepoints = [];
+          eyes = new Two.Polygon(getEYEpoints(eyepoints,16,i,5,0,0),true,true);
+          eyes.scale = dnascale, eyes.linewidth = 0.5, eyes.opacity = 1;
+          eyes.stroke = eyes.fill = colors[0];
+          GENEE.add(eyes);
+        }
+
+        for (i in ids) { // adding eyeball
+          var eyepoints = [];
+          eyes = new Two.Polygon(getEYEBALLpoints(eyepoints,16,i,5,0,0),true,true);
+          eyes.scale = dnascale, eyes.linewidth = 0.25, eyes.opacity = 1;
+          eyes.stroke = colors[4], eyes.fill = colors[3];
+          GENEE.add(eyes);
+        }
+
+        for (i in ids) { // adding iris
+          var eyepoints = [];
+          eyes = new Two.Polygon(getEYEpoints(eyepoints,8,i,3,xlooking,ylooking),true,true);
+          eyes.scale = dnascale, eyes.linewidth = 0.5, eyes.opacity = 0.5;
+          eyes.noStroke().fill = colors[0];
+          GENEE.add(eyes);
+        }
+
+        for (i in ids) { // adding pupil
+          var eyepoints = [];
+          eyes = new Two.Polygon(getEYEpoints(eyepoints,8,i,2,xlooking,ylooking),true,true);
+          eyes.scale = dnascale, eyes.linewidth = 0.5, eyes.opacity = 1;
+          eyes.stroke = eyes.fill = colors[5];
+          GENEE.add(eyes);
+        }
+
+        for (i in ids) { // adding reflection
+          var eyepoints = [];
+          eyes = new Two.Polygon(getEYEpoints(eyepoints,8,i,0.75,xlooking + 1.6,ylooking + 0.9),true,true);
+          eyes.scale = dnascale, eyes.linewidth = 0.5, eyes.opacity = 0.85;
+          eyes.noStroke().fill = colors[3];
+          GENEE.add(eyes);
+        }
+
+        _.extend(two.renderer.domElement.style, {
+          background: 'url(' + generateGrid() + ') center center'
+        });
+
+        resize();
+
+        two
+          .bind('resize', resize)
+          .bind('update', function() {
+            physics.update();
+            // GENEE.translation.set.x += (GENEE.destination.set.x - GENEE.translation.set.x) * 0.5625;
+            // GENEE.translation.set.y += (GENEE.destination.set.y - GENEE.translation.set.y) * 0.5625;
+          })
+          .play();
+
+        function resize() {
+          GENEE.translation.set(50,300);
+          GENEE.translation.set(two.width / 3, two.height / 2); //center of page
+        }
+
+        function generateGrid() {
+          var two = new Two({
+            type: Two.Types.canvas,
+            width: 20,
+            height: 20,
+            ratio: 1
+          });
+
+          return two.renderer.domElement.toDataURL('image/png');
+
+        }
+      </script>
+    </div>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','analytics.js','ga');
+
+      ga('create', 'UA-40550435-1', 'github.com');
+      ga('send', 'pageview');
+
+    </script>
+  </body>
+</html>
