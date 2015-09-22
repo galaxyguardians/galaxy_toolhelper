@@ -1,4 +1,4 @@
-Galaxy Tool Helper (aka Galaxy "Genee" (TM) )
+Galaxy Tool Helper (aka Galaxy "Genee" TM )
 ===
 
 ### Goal
