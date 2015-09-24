@@ -10,6 +10,7 @@ def main():
     in_fname, cat_fname, out_fname = sys.argv[1:4]
     infile = h5py.File(in_fname, 'r')
     keys = infile.keys()
+    """
     temp = h5py.File(cat_fname, 'r')
     cat_names = temp['categories'][...]
     temp1 = temp['chain_categories'][...]
@@ -23,23 +24,33 @@ def main():
     triplets = []
     for i in range(len(cat_names)):
         triplets.append({})
-    for key in keys:
+    """
+    triplets = {}
+    total = len(keys)
+    for h, key in enumerate(keys):
         if key[0] == 't':
             continue
-        if key not in chain_cats:
-            continue
-        h = chain_cats[key]
+        #if key not in chain_cats:
+        #    continue
+        #h = chain_cats[key]
         data = infile[key][...]
         index = numpy.r_[0, numpy.bincount(data[:, 0])]
         for i in range(1, index.shape[0]):
-            index[i] += index[0]
+            index[i] += index[i - 1]
         for i in range(data.shape[0]):
-            find_triplet(triplets[h], data, index, i, True, data[i, 2])
+            #find_triplet(triplets[h], data, index, i, True, data[i, 2])
+            find_triplet(triplets, data, index, i, True, data[i, 2])
+        print >> sys.stderr, ("\r%i: %i") % (total, h),
     infile.close()
+    """
     for i in range(len(cat_names)):
-        output = open("%s.txt" % cat_names.replace(' ','_').replace('-','_'), 'w')
+        output = open("%s.txt" % cat_names[i].replace(' ','_').replace('-','_'), 'w')
         output.write(str(triplets[i]))
         output.close()
+    """
+    output = open(out_fname, 'w')
+    output.write(str(triplets))
+    output.close()
 
 def find_triplet(triplets, data, index, i, first, key):
     if data[i, 1] >= index.shape[0] - 1:
