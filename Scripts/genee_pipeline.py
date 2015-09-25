@@ -2,7 +2,6 @@
 
 import sys
 import json
-
 import numpy
 
 
@@ -10,9 +9,10 @@ def main():
     in_fname, chains_fname, triplets_fname = sys.argv[1:4]
     data, tool_names = load_csv(in_fname)
     tool_chains = parse_dataset(data)
-    #write_tool_chains(tool_chains, tool_names, chains_fname)
+    # write_tool_chains(tool_chains, tool_names, chains_fname)
     triplets = parse_chains(tool_chains, tool_names)
     write_triplets(triplets, triplets_fname)
+
 
 def load_csv(fname):
     """Read in the csv data file into a numpy array"""
@@ -44,6 +44,7 @@ def load_csv(fname):
     data = numpy.array(data, dtype=numpy.int32)
     print >> sys.stderr, ("\rFinished reading csv file\n"),
     return [data, tool_names]
+
 
 def parse_dataset(data):
     """Parse the data array into tool chains"""
@@ -81,8 +82,7 @@ def parse_dataset(data):
                     chains[chain_number1] += chain_list2
                     chains[chain_number2] = chain_number1
                 chain_number = chain_number1
-            else:
-            # if only the second dataset was observed, use its chain
+            else:  # if only the second dataset was observed, use its chain
                 chain_number = chain_number2
         elif chain_number1 is not None:
             # if only the first dataset was observed, use its chain
@@ -128,6 +128,7 @@ def parse_dataset(data):
     print >> sys.stderr, ("\rFinished parsing dataset into chains               \n"),
     return filtered_chains
 
+
 def parse_chains(data, tool_names):
     """Parse tool chains to find tool triplets"""
     triplets = {}
@@ -161,6 +162,7 @@ def parse_chains(data, tool_names):
     print >> sys.stderr, ("\rFinished parsing chains into triplets               \n"),
     return filtered_triplets
 
+
 def find_triplet(triplets, data, index, i, first, key):
     # if second dataset doesn't serve as the input for any tool, stop looking
     if data[i, 1] >= index.shape[0] - 1:
@@ -180,6 +182,7 @@ def find_triplet(triplets, data, index, i, first, key):
             triplets[key][data[j, 2]] += 1
     return None
 
+
 def write_tool_chains(chains, tool_names, out_fname):
     results = {}
     for i, chain in enumerate(chains):
@@ -191,8 +194,9 @@ def write_tool_chains(chains, tool_names, out_fname):
                                         'label': tool_names[chain[j, 2]]})
         results['chain_%i' % i] = temp_chain
     output = open(out_fname, 'w')
-    output.write( "var data = %s;" % json.dumps(results))
+    output.write("var data = %s;" % json.dumps(results))
     output.close()
+
 
 def write_triplets(triplets, out_fname):
     """Jsonify triplets and write to file"""
