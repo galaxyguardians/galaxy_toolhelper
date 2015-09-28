@@ -4,15 +4,16 @@ import sys
 import json
 
 import numpy
+import h5py
 
 
 def main():
     in_fname, chains_fname, triplets_fname = sys.argv[1:4]
     data, tool_names = load_csv(in_fname)
     tool_chains = parse_dataset(data)
-    #write_tool_chains(tool_chains, tool_names, chains_fname)
+    write_tool_chains(tool_chains, tool_names, chains_fname)
     triplets = parse_chains(tool_chains, tool_names)
-    write_triplets(triplets, triplets_fname)
+    write_triplets(triplets, tool_names, triplets_fname)
 
 def load_csv(fname):
     """Read in the csv data file into a numpy array"""
@@ -154,9 +155,9 @@ def parse_chains(data, tool_names):
         # convert to percentages
         tool_values = {}
         for tool, value in values.iteritems():
-            tool_values[tool_names[tool]] = value / total
+            tool_values[str(tool)] = value / total
         # convert tool indices to names
-        new_key = "%s,%s" % (tool_names[triplet[0]], tool_names[triplet[1]])
+        new_key = "%i,%i" % (triplet[0], triplet[1])
         filtered_triplets[new_key] = tool_values
     print >> sys.stderr, ("\rFinished parsing chains into triplets               \n"),
     return filtered_triplets
@@ -181,23 +182,16 @@ def find_triplet(triplets, data, index, i, first, key):
     return None
 
 def write_tool_chains(chains, tool_names, out_fname):
-    results = {}
+    output = h5py.File(out_fname, 'w')
+    output.create_dataset(name='tool_names', data=tool_names)
     for i, chain in enumerate(chains):
-        temp_chain = {'nodes': [], 'edges': []}
-        for j in range(numpy.amax(chain[:, :2])):
-            temp_chain['nodes'].append({'id': int(j), 'label': str(j)})
-        for j in range(chain.shape[0]):
-            temp_chain['edges'].append({'from': int(chain[j, 0]), 'to': int(chain[j, 1]),
-                                        'label': tool_names[chain[j, 2]]})
-        results['chain_%i' % i] = temp_chain
-    output = open(out_fname, 'w')
-    output.write( "var data = %s;" % json.dumps(results))
+        output.create_dataset(name="chain_%i" % i, data=chain)
     output.close()
 
-def write_triplets(triplets, out_fname):
+def write_triplets(triplets, tool_names, out_fname):
     """Jsonify triplets and write to file"""
     output = open(out_fname, 'w')
-    output.write(json.dumps(triplets))
+    output.write(json.dumps({'tool_names': tool_names, 'triplets': triplets}))
     output.close()
 
 if __name__ == "__main__":
