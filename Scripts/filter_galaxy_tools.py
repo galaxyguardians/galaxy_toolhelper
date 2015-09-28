@@ -2,8 +2,8 @@
 
 import os
 import json
-# import imp
 import xml.etree.ElementTree as ET
+# import imp
 # tool_parser = imp.load_source("galaxy.tools.parser",\
 # "/Users/nturaga/Documents/PR_testing/galaxy/lib/galaxy/tools/parser")
 
@@ -38,10 +38,14 @@ def tool_parse(xmlfile):
         if param.get("format") is not None:
             # Get param's format
             param_format = param.get("format")
+            # print param_format
+            # print tool_name
             if param_format not in format_tool_dict.keys():
                 format_tool_dict[param_format] = [tool_name]
             else:
                 format_tool_dict[param_format].append(tool_name)
+
+    # print "Format: Tool Dictionary", format_tool_dict
     return format_tool_dict
 
 
@@ -54,19 +58,27 @@ def make_tool_dict(tool_conf_file, tools_dir):
     """
     tools = find_tool_xmlfiles(tool_conf_file, tools_dir)
     tool_dict = {}
-    for i in xrange(len(tools)):
+    for tool in tools:
         # Get Inputs
-        dic = tool_parse(tools[i])
+        dic = tool_parse(tool)
         # Skip if there are no inputs
         if len(dic) == 0:
             continue
-        # Add datatype : [list of tools] to dictionary
-        datatype = dic.keys()[0]
-        if datatype in tool_dict.keys():
-            for value in dic.values():
-                tool_dict[datatype].append(value[0])
-        else:
-            tool_dict[datatype] = dic.values()[0]
+        # Add datatype to dictionary
+        # print tool
+        for datatype, tools in dic.iteritems():
+            if datatype not in tool_dict.keys():
+                # print "Adding datatype and list of tools"
+                # print "Datatype: %s Tools: %s" % (datatype, tools)
+                tool_dict[datatype] = tools
+                tool_dict[datatype] = list(set(tool_dict[datatype]))
+            else:
+                # print "Need to add pre existing keys in tool_dict"
+                # print "Datatype: %s Tools: %s" % (datatype, tools)
+                for elem in tools:
+                    tool_dict[datatype].append(elem)
+                tool_dict[datatype] = list(set(tool_dict[datatype]))
+                # print "Dictionary after appending: ", tool_dict
     return tool_dict
 
 
