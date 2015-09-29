@@ -66,18 +66,21 @@ def make_tool_dict(tool_conf_file, tools_dir):
             continue
         # Add datatype to dictionary
         # print tool
-        for datatype, tools in dic.iteritems():
-            if datatype not in tool_dict.keys():
+        for datatypes, tools in dic.iteritems():
+            # print datatypes.split(","), type(datatypes.split(",")[0])
+            # Loop through comma seperated datatypes
+            for datatype in datatypes.split(","):
+                if datatype not in tool_dict.keys():
                 # print "Adding datatype and list of tools"
                 # print "Datatype: %s Tools: %s" % (datatype, tools)
-                tool_dict[datatype] = tools
-                tool_dict[datatype] = list(set(tool_dict[datatype]))
-            else:
+                    tool_dict[datatype] = tools
+                    tool_dict[datatype] = list(set(tool_dict[datatype]))
+                else:
                 # print "Need to add pre existing keys in tool_dict"
                 # print "Datatype: %s Tools: %s" % (datatype, tools)
-                for elem in tools:
-                    tool_dict[datatype].append(elem)
-                tool_dict[datatype] = list(set(tool_dict[datatype]))
+                    for elem in tools:
+                        tool_dict[datatype].append(elem)
+                    tool_dict[datatype] = list(set(tool_dict[datatype]))
                 # print "Dictionary after appending: ", tool_dict
     return tool_dict
 
