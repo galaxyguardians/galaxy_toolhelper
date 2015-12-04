@@ -3,6 +3,7 @@
 import os
 import json
 import xml.etree.ElementTree as ET
+from xml.dom import minidom
 # import imp
 # tool_parser = imp.load_source("galaxy.tools.parser",\
 # "/Users/nturaga/Documents/PR_testing/galaxy/lib/galaxy/tools/parser")
@@ -30,7 +31,10 @@ def tool_parse(xmlfile):
         tree = ET.parse(tool)
         inputs = tree.findall("./inputs//param")
         # attributes = [param.attrib for param in inputs]
-        tool_name = tool.name.split("/")[-1].replace(".xml", "")
+        #tool_name = tool.name.split("/")[-1].replace(".xml", "")
+	f= minidom.parse(xmlfile)
+	items = f.getElementsByTagName("tool")
+	tool_name= items[0].attributes['id'].value
     # Find all params
     format_tool_dict = {}
     for param in inputs:
@@ -85,12 +89,34 @@ def make_tool_dict(tool_conf_file, tools_dir):
     return tool_dict
 
 
+def make_better_tool_dict(datatype_to_tool, datatype_hierarchy):
+    """
+    Input: 
+    """
+    tool_datatypes = {}
+    for datatype in datatype_to_tool.keys():
+        for tool in datatype_to_tool[datatype]:
+            if datatype_hierarchy.get(datatype):
+                tool_datatypes[tool] = datatype_hierarchy[datatype]
+            else:
+                print "Missing datatype %s" % datatype
+    return tool_datatypes
+
+
 if __name__ == "__main__":
-    TOOLS_DIR = "/Users/nturaga/Documents/PR_testing/galaxy/tools"
-    tool_conf_file = "/Users/nturaga/Documents/PR_testing/galaxy/config/tool_conf.xml.sample"
+    TOOLS_DIR = "/Users/taylorlab/Documents/galaxy/tools"
+    tool_conf_file = "/Users/taylorlab/Documents/galaxy/config/tool_conf.xml.sample"
+    datatype_tree_file = "../Data/datatype_tree.json"
+    with open(datatype_tree_file, 'r') as f:
+        datatype_tree = json.load(f)
     tool_dict = make_tool_dict(tool_conf_file, TOOLS_DIR)
+    tool_dict2 = make_better_tool_dict(tool_dict, datatype_tree)
 
     """Jsonify Tool dictionary and write to file"""
     output = open('galaxy_filter_dictionary.json', 'w')
     output.write(json.dumps(tool_dict))
+    output.close()
+
+    output = open('tool_datatypes.json', 'w')
+    output.write(json.dumps(tool_dict2))
     output.close()
