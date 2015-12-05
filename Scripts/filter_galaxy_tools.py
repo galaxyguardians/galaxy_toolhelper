@@ -31,10 +31,10 @@ def tool_parse(xmlfile):
         tree = ET.parse(tool)
         inputs = tree.findall("./inputs//param")
         # attributes = [param.attrib for param in inputs]
-        #tool_name = tool.name.split("/")[-1].replace(".xml", "")
-	f= minidom.parse(xmlfile)
-	items = f.getElementsByTagName("tool")
-	tool_name= items[0].attributes['id'].value
+        # tool_name = tool.name.split("/")[-1].replace(".xml", "")
+    f = minidom.parse(xmlfile)
+    items = f.getElementsByTagName("tool")
+    tool_name = items[0].attributes['id'].value
     # Find all params
     format_tool_dict = {}
     for param in inputs:
@@ -75,23 +75,23 @@ def make_tool_dict(tool_conf_file, tools_dir):
             # Loop through comma seperated datatypes
             for datatype in datatypes.split(","):
                 if datatype not in tool_dict.keys():
-                # print "Adding datatype and list of tools"
-                # print "Datatype: %s Tools: %s" % (datatype, tools)
+                    # print "Adding datatype and list of tools"
+                    # print "Datatype: %s Tools: %s" % (datatype, tools)
                     tool_dict[datatype] = tools
                     tool_dict[datatype] = list(set(tool_dict[datatype]))
                 else:
-                # print "Need to add pre existing keys in tool_dict"
-                # print "Datatype: %s Tools: %s" % (datatype, tools)
+                    # print "Need to add pre existing keys in tool_dict"
+                    # print "Datatype: %s Tools: %s" % (datatype, tools)
                     for elem in tools:
                         tool_dict[datatype].append(elem)
                     tool_dict[datatype] = list(set(tool_dict[datatype]))
-                # print "Dictionary after appending: ", tool_dict
+                    # print "Dictionary after appending: ", tool_dict
     return tool_dict
 
 
 def make_better_tool_dict(datatype_to_tool, datatype_hierarchy):
     """
-    Input: 
+    Input:
     """
     tool_datatypes = {}
     for datatype in datatype_to_tool.keys():
