@@ -103,14 +103,34 @@ def make_better_tool_dict(datatype_to_tool, datatype_hierarchy):
     return tool_datatypes
 
 
+def comprehensive_datatype_tools(datatype_to_tool, datatype_hierarchy):
+    """
+    Compose a map of datatypes to compatible tools.
+
+    Iterate through the values of all the hierarchy keys. For each value,
+    compose a comprehensive list of tools found in `datatype_to_tool`.
+    """
+    datatype_tools = {}
+    for dt in datatype_to_tool.keys():
+        datatype_tools[dt] = datatype_to_tool[dt]
+        for parent_dt in datatype_hierarchy.keys():
+            if dt in datatype_hierarchy[parent_dt]:
+                datatype_tools[dt] += datatype_to_tool.get(parent_dt, [])
+    # Remove duplicates
+    for dt in datatype_tools.keys():
+        datatype_tools[dt] = list(set(datatype_tools[dt]))
+        print datatype_tools[dt]
+    return datatype_tools
+
 if __name__ == "__main__":
-    TOOLS_DIR = "/Users/taylorlab/Documents/galaxy/tools"
-    tool_conf_file = "/Users/taylorlab/Documents/galaxy/config/tool_conf.xml.sample"
+    TOOLS_DIR = "/Users/eafgan/projects/pprojects/galaxy/galaxy/tools"
+    tool_conf_file = "/Users/eafgan/projects/pprojects/galaxy/galaxy/config/tool_conf.xml.sample"
     datatype_tree_file = "../Data/datatype_tree.json"
     with open(datatype_tree_file, 'r') as f:
         datatype_tree = json.load(f)
     tool_dict = make_tool_dict(tool_conf_file, TOOLS_DIR)
     tool_dict2 = make_better_tool_dict(tool_dict, datatype_tree)
+    datatype_tools = comprehensive_datatype_tools(tool_dict, datatype_tree)
 
     """Jsonify Tool dictionary and write to file"""
     output = open('galaxy_filter_dictionary.json', 'w')
@@ -120,3 +140,6 @@ if __name__ == "__main__":
     output = open('tool_datatypes.json', 'w')
     output.write(json.dumps(tool_dict2))
     output.close()
+
+    with open('datatype_tools.json', 'w') as f:
+        f.write(json.dumps(datatype_tools))
